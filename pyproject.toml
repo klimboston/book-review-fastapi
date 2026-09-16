@@ -1,0 +1,27 @@
+[project]
+name = "book-review-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "klimboston", email = "kklimadv@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "bcrypt>=5.0.0",
+    "fastapi[standard]>=0.141.1",
+    "pydantic>=2.13.5",
+    "pyjwt>=2.14.0",
+    "sqlmodel>=0.0.42",
+    "uvicorn>=0.52.4",
+]
+
+[project.scripts]
+book-review-project = "book_review_project:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.fastapi]
+entrypoint = "src.book_review_project.main:app"
