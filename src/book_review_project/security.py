@@ -3,8 +3,10 @@ from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
 
-SECRET_KEY = "supersecret"
-ALGORITHM = "HS256"
+from src.book_review_project.config import settings
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 
 
 def hash_password(password: str) -> str:

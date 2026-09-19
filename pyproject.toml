@@ -10,8 +10,11 @@ requires-python = ">=3.14"
 dependencies = [
     "bcrypt>=5.0.0",
     "fastapi[standard]>=0.141.1",
+    "httpx>=0.28.1",
     "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
     "pyjwt>=2.14.0",
+    "pytest>=9.1.1",
     "sqlmodel>=0.0.42",
     "uvicorn>=0.52.4",
 ]
@@ -25,3 +28,10 @@ build-backend = "uv_build"
 
 [tool.fastapi]
 entrypoint = "src.book_review_project.main:app"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+filterwarnings = [
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+    "ignore:The anyio.abc.BlockingPortal alias is deprecated"
+]
