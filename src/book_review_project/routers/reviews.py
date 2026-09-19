@@ -13,14 +13,14 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
     response_model=Review,
     status_code=status.HTTP_201_CREATED,
 )
-def create_review(review: Annotated[ReviewCreate, Body()], db: SessionDep, current_user: CurrentUserDep):
-    book = db.get(Book, review.book_id)
+async def create_review(review: Annotated[ReviewCreate, Body()], db: SessionDep, current_user: CurrentUserDep):
+    book = await db.get(Book, review.book_id)
     if book is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Книга не найдена")
     
     db_review = Review(**review.model_dump(), user_id=current_user.id)
     
     db.add(db_review)
-    db.commit()
-    db.refresh(db_review)
+    await db.commit()
+    await db.refresh(db_review)
     return db_review

@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, HTTPException, Path, Query, status
+from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from src.book_review_project.dependencies import CurrentUserDep, SessionDep
@@ -10,13 +11,13 @@ router = APIRouter(prefix="/books", tags=["books"])
 
 
 @router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED)
-def create_book(
+async def create_book(
     book: Annotated[Book, Body()], db: SessionDep, current_user: CurrentUserDep
 ):
     book.user_id = current_user.id
     db.add(book)
-    db.commit()
-    db.refresh(book)
+    await db.commit()
+    await db.refresh(book)
     return book
 
 
@@ -25,8 +26,9 @@ def create_book(
     response_model=BookWithReviews,
     status_code=status.HTTP_200_OK,
 )
-def get_book(book_id: Annotated[int, Path()], db: SessionDep):
-    book = db.get(Book, book_id)
+async def get_book(book_id: Annotated[int, Path()], db: SessionDep):
+    statement = select(Book).where(Book.id==book_id).options(selectinload(Book.book_reviews))
+    book = (await db.exec(statement)).first()
     if book is None:
         raise HTTPException(status_code=404, detail="Книга не найдена")
 
@@ -34,10 +36,13 @@ def get_book(book_id: Annotated[int, Path()], db: SessionDep):
 
 
 @router.get("/", response_model=list[BookWithReviews], status_code=status.HTTP_200_OK)
-def get_books(
+async def get_books(
     db: SessionDep,
     offset: Annotated[int, Query()] = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ):
-    books = db.exec(select(Book).offset(offset=offset).limit(limit=limit)).all()
+    statement = (
+        select(Book).offset(offset).limit(limit).options(selectinload(Book.book_reviews))
+    )
+    books = (await db.exec(statement)).all()
     return books

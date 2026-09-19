@@ -7,13 +7,14 @@ from src.book_review_project.database import engine
 from src.book_review_project.routers import books, reviews, users
 
 
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+async def create_db_and_tables():
+    async with engine.begin() as con:
+        await con.run_sync(SQLModel.metadata.create_all)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_db_and_tables()
+    await create_db_and_tables()
     yield
 
 
