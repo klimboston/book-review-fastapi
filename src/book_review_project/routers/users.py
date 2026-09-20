@@ -68,6 +68,7 @@ async def create_user(user: CreateUser, db: SessionDep):
 async def login_user(
     login_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: SessionDep
 ):
+    
     user = (
         await db.exec(select(User).where(User.email == login_data.username))
     ).first()
