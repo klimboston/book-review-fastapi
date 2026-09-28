@@ -2,17 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from sqlmodel import select
 
 from src.book_review_project.dependencies import SessionDep
-from src.book_review_project.models import (
-    CreateUser,
-    Token,
-    User,
-    UserLogin,
-    UserWithBooks,
-)
+from src.book_review_project.models import User
+from src.book_review_project.schemas import CreateUser, Token, UserWithBooks
 from src.book_review_project.security import (
     create_access_token,
     hash_password,
@@ -27,9 +22,9 @@ router = APIRouter(prefix="/users", tags=["users"])
     response_model=UserWithBooks,
     status_code=status.HTTP_200_OK,
 )
-async def get_user(user_id: Annotated[int, Path()], db: SessionDep):
+async def get_user(user_id: Annotated[int, Path(ge=1)], db: SessionDep):
     statement = select(User).where(User.id == user_id).options(selectinload(User.books))
-    user = (await db.exec(statement)).first()
+    user = (await db.execute(statement)).scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
@@ -47,7 +42,11 @@ async def get_users(
     offset: Annotated[int, Query()] = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ):
-    users = (await db.exec(select(User).offset(offset=offset).limit(limit=limit))).all()
+    users = (
+        (await db.execute(select(User).offset(offset=offset).limit(limit=limit)))
+        .scalars()
+        .all()
+    )
     return users
 
 
@@ -68,10 +67,11 @@ async def create_user(user: CreateUser, db: SessionDep):
 async def login_user(
     login_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: SessionDep
 ):
-    
+
     user = (
-        await db.exec(select(User).where(User.email == login_data.username))
-    ).first()
+        (await db.execute(select(User).where(User.email == login_data.username)))
+        .scalar_one_or_none()
+    )
     if user is None or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
     access_token = create_access_token(data={"sub": str(user.id)})

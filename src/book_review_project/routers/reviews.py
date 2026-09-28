@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Body, HTTPException, status
 
 from src.book_review_project.dependencies import CurrentUserDep, SessionDep
-from src.book_review_project.models import Book, Review, ReviewCreate
+from src.book_review_project.models import Book, Review
+from src.book_review_project.schemas import ReviewCreate
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
