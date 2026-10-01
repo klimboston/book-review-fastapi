@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from src.book_review_project.dependencies import get_session
+from book_review_project.core.dependencies import get_session
 from src.book_review_project.main import app
 from src.book_review_project.models import Book, Review, User
 

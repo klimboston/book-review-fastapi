@@ -14,7 +14,9 @@ def create_user(client):
 
 
 def test_register_user(client, create_user):
+    
     responce: Response = create_user
+    body = responce.json()
     assert responce.status_code == 201
     assert "id" in responce.json()
     assert responce.json()["username"] == create_user.json()["username"]

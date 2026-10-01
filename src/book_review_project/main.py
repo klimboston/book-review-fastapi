@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlmodel import SQLModel
 
-from src.book_review_project.database import engine
+from src.book_review_project.core.database import engine
 from src.book_review_project.routers import books, reviews, users
 
 

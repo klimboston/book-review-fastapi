@@ -5,14 +5,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.book_review_project.dependencies import SessionDep
-from src.book_review_project.models import User
-from src.book_review_project.schemas import CreateUser, Token, UserWithBooks
-from src.book_review_project.security import (
+from src.book_review_project.core.dependencies import SessionDep, UserRepositoryDep
+from src.book_review_project.core.security import (
     create_access_token,
     hash_password,
     verify_password,
 )
+from src.book_review_project.models import User
+from src.book_review_project.repositories.user import UserRepository
+from src.book_review_project.schemas import CreateUser, Token, UserWithBooks
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -22,12 +23,11 @@ router = APIRouter(prefix="/users", tags=["users"])
     response_model=UserWithBooks,
     status_code=status.HTTP_200_OK,
 )
-async def get_user(user_id: Annotated[int, Path(ge=1)], db: SessionDep):
-    statement = select(User).where(User.id == user_id).options(selectinload(User.books))
-    user = (await db.execute(statement)).scalar_one_or_none()
-    if user is None:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-
+async def get_user(
+    user_id: Annotated[int, Path(ge=1)], user_repository: UserRepositoryDep
+):
+    """Получить пользователя с его книгами по user_id"""
+    user = await user_repository.get_user_by_id(user_id)
     return user
 
 
@@ -38,15 +38,12 @@ async def get_user(user_id: Annotated[int, Path(ge=1)], db: SessionDep):
     summary="Получить всех пользователей",
 )
 async def get_users(
-    db: SessionDep,
+    user_repository: UserRepositoryDep,
     offset: Annotated[int, Query()] = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ):
-    users = (
-        (await db.execute(select(User).offset(offset=offset).limit(limit=limit)))
-        .scalars()
-        .all()
-    )
+    """Получить всех пользователей"""
+    users = await user_repository.get_all_users(offset=offset, limit=limit)
     return users
 
 
@@ -69,9 +66,8 @@ async def login_user(
 ):
 
     user = (
-        (await db.execute(select(User).where(User.email == login_data.username)))
-        .scalar_one_or_none()
-    )
+        await db.execute(select(User).where(User.email == login_data.username))
+    ).scalar_one_or_none()
     if user is None or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
     access_token = create_access_token(data={"sub": str(user.id)})

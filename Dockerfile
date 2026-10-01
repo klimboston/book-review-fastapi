@@ -20,5 +20,5 @@ COPY --chown=app:app README.md ./
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=.
 
-CMD ["uvicorn", "src.book_review_project.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.book_review_project.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 

@@ -5,9 +5,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.book_review_project.database import async_session_maker
+from src.book_review_project.core.database import async_session_maker
+from src.book_review_project.core.security import ALGORITHM, SECRET_KEY
 from src.book_review_project.models import User
-from src.book_review_project.security import ALGORITHM, SECRET_KEY
+from src.book_review_project.repositories.user import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
@@ -18,6 +19,9 @@ async def get_session():
 
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
+"""
+Зависимость для создания асинхронной сессии с базой данных
+"""
 
 
 async def get_current_user(
@@ -43,3 +47,18 @@ async def get_current_user(
 
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+"""
+Зависимость для проверки пользователя на наличие валидного JWT токена.
+"""
+
+
+
+def get_user_repository(session: SessionDep):
+    return UserRepository(session)
+
+
+UserRepositoryDep = Annotated[UserRepository, Depends(get_user_repository)]
+"""
+Зависимость для работы с репозиторием таблицы User, возвращает экземпляр
+UserRepository(session)
+"""

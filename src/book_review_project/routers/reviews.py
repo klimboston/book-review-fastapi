@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, HTTPException, status
 
-from src.book_review_project.dependencies import CurrentUserDep, SessionDep
+from src.book_review_project.core.dependencies import CurrentUserDep, SessionDep
 from src.book_review_project.models import Book, Review
 from src.book_review_project.schemas import ReviewCreate
 
