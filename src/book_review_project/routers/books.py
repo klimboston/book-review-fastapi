@@ -1,13 +1,10 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, HTTPException, Path, Query, status
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from src.book_review_project.core.dependencies import (
     BookRepositoryDep,
     CurrentUserDep,
-    SessionDep,
 )
 from src.book_review_project.models import Book
 from src.book_review_project.schemas import BookWithReviews, CreateBook

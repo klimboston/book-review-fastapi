@@ -9,6 +9,7 @@ from src.book_review_project.core.database import async_session_maker
 from src.book_review_project.core.security import ALGORITHM, SECRET_KEY
 from src.book_review_project.models import User
 from src.book_review_project.repositories.book import BookRepository
+from src.book_review_project.repositories.review import ReviewRepository
 from src.book_review_project.repositories.user import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
@@ -71,4 +72,14 @@ BookRepositoryDep = Annotated[BookRepository, Depends(get_book_repository)]
 """
 Зависимость для работы с репозиторием таблицы Book, возвращает экземпляр
 BookRepository(session)
+"""
+
+
+def get_review_repository(session: SessionDep):
+    return ReviewRepository(session)
+
+ReviewRepositoryDep = Annotated[ReviewRepository, Depends(get_review_repository)]
+"""
+Зависимость для работы с репозиторием таблицы Review, возвращает экземпляр
+ReviewRepository(session)
 """
