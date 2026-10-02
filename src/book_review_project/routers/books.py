@@ -4,22 +4,26 @@ from fastapi import APIRouter, Body, HTTPException, Path, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.book_review_project.core.dependencies import CurrentUserDep, SessionDep
+from src.book_review_project.core.dependencies import (
+    BookRepositoryDep,
+    CurrentUserDep,
+    SessionDep,
+)
 from src.book_review_project.models import Book
-from src.book_review_project.schemas import BookWithReviews
+from src.book_review_project.schemas import BookWithReviews, CreateBook
 
 router = APIRouter(prefix="/books", tags=["books"])
 
 
 @router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED)
 async def create_book(
-    book: Annotated[Book, Body()], db: SessionDep, current_user: CurrentUserDep
+    book: Annotated[CreateBook, Body()],
+    book_repository: BookRepositoryDep,
+    current_user: CurrentUserDep,
 ):
     book.user_id = current_user.id
-    db.add(book)
-    await db.commit()
-    await db.refresh(book)
-    return book
+    db_book = await book_repository.create_book(book)
+    return db_book
 
 
 @router.get(
@@ -27,11 +31,8 @@ async def create_book(
     response_model=BookWithReviews,
     status_code=status.HTTP_200_OK,
 )
-async def get_book(book_id: Annotated[int, Path()], db: SessionDep):
-    statement = (
-        select(Book).where(Book.id == book_id).options(selectinload(Book.book_reviews))
-    )
-    book = (await db.execute(statement)).scalar_one_or_none()
+async def get_book(book_id: Annotated[int, Path()], book_repository: BookRepositoryDep):
+    book = await book_repository.get_book_by_id(book_id)
     if book is None:
         raise HTTPException(status_code=404, detail="Книга не найдена")
 
@@ -40,15 +41,9 @@ async def get_book(book_id: Annotated[int, Path()], db: SessionDep):
 
 @router.get("/", response_model=list[BookWithReviews], status_code=status.HTTP_200_OK)
 async def get_books(
-    db: SessionDep,
+    book_repository: BookRepositoryDep,
     offset: Annotated[int, Query()] = 0,
     limit: Annotated[int, Query(le=100)] = 100,
 ):
-    statement = (
-        select(Book)
-        .offset(offset)
-        .limit(limit)
-        .options(selectinload(Book.book_reviews))
-    )
-    books = (await db.execute(statement)).scalars().all()
+    books = await book_repository.get_books_all(offset=offset, limit=limit)
     return books

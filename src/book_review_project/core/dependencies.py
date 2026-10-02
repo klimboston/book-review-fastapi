@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.book_review_project.core.database import async_session_maker
 from src.book_review_project.core.security import ALGORITHM, SECRET_KEY
 from src.book_review_project.models import User
+from src.book_review_project.repositories.book import BookRepository
 from src.book_review_project.repositories.user import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
@@ -52,7 +53,6 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
 """
 
 
-
 def get_user_repository(session: SessionDep):
     return UserRepository(session)
 
@@ -61,4 +61,14 @@ UserRepositoryDep = Annotated[UserRepository, Depends(get_user_repository)]
 """
 Зависимость для работы с репозиторием таблицы User, возвращает экземпляр
 UserRepository(session)
+"""
+
+
+def get_book_repository(session: SessionDep):
+    return BookRepository(session)
+
+BookRepositoryDep = Annotated[BookRepository, Depends(get_book_repository)]
+"""
+Зависимость для работы с репозиторием таблицы Book, возвращает экземпляр
+BookRepository(session)
 """

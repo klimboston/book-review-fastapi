@@ -44,6 +44,12 @@ class ReviewCreate(BaseModel):
     book_id: int
 
 
+class CreateBook(BaseModel):
+    user_id: int | None
+    title: str
+    author: str
+    description: str | None = Field(default=None)
+
 class BookWithReviews(BaseModel):
     id: int
     user_id: int
