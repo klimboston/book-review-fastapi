@@ -1,10 +1,8 @@
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.book_review_project.models import User
-from src.book_review_project.schemas import CreateUser
 
 
 class UserRepository:
@@ -26,7 +24,7 @@ class UserRepository:
         users = (await self.session.execute(statement)).scalars().all()
         return users
 
-    async def create_user(self, user: CreateUser, hashed_password: str):
+    async def create_user(self, user: User, hashed_password: str):
         db_user = User(
             **user.model_dump(exclude={"password"}), hashed_password=hashed_password
         )
@@ -35,7 +33,7 @@ class UserRepository:
         await self.session.refresh(db_user)
         return db_user
 
-    async def login_user(self, login_data: OAuth2PasswordRequestForm):
+    async def login_user(self, login_data):
         user = (
             await self.session.execute(
                 select(User).where(User.email == login_data.username)

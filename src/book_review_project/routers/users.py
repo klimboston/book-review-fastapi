@@ -2,17 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
-from src.book_review_project.core.dependencies import SessionDep, UserRepositoryDep
+from src.book_review_project.core.dependencies import UserRepositoryDep
 from src.book_review_project.core.security import (
     create_access_token,
     hash_password,
     verify_password,
 )
 from src.book_review_project.models import User
-from src.book_review_project.repositories.user import UserRepository
 from src.book_review_project.schemas import CreateUser, Token, UserWithBooks
 
 router = APIRouter(prefix="/users", tags=["users"])
