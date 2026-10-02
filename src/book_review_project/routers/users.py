@@ -28,6 +28,8 @@ async def get_user(
 ):
     """Получить пользователя с его книгами по user_id"""
     user = await user_repository.get_user_by_id(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
     return user
 
 
@@ -48,26 +50,20 @@ async def get_users(
 
 
 @router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
-async def create_user(user: CreateUser, db: SessionDep):
+async def create_user(user: CreateUser, user_repository: UserRepositoryDep):
     """Регистрация пользователя"""
     hashed_password = hash_password(user.password)
-    db_user = User(
-        **user.model_dump(exclude={"password"}), hashed_password=hashed_password
-    )
-    db.add(db_user)
-    await db.commit()
-    await db.refresh(db_user)
+    db_user = await user_repository.create_user(user, hashed_password)
     return db_user
 
 
 @router.post("/login", response_model=Token, status_code=200)
 async def login_user(
-    login_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: SessionDep
+    login_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    user_repository: UserRepositoryDep,
 ):
 
-    user = (
-        await db.execute(select(User).where(User.email == login_data.username))
-    ).scalar_one_or_none()
+    user = await user_repository.login_user(login_data)
     if user is None or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
     access_token = create_access_token(data={"sub": str(user.id)})

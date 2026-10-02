@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class BookPublic(BaseModel):
@@ -10,11 +10,15 @@ class BookPublic(BaseModel):
 
 
 class CreateUser(BaseModel):
+    """Схема запроса создания пользователя, должна содержать имя пользователя,
+    email и пароль.
+    """
+
     username: str
-    email: str
+    email: EmailStr
     password: str
-    
-    
+
+
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -42,11 +46,11 @@ class ReviewCreate(BaseModel):
 
 class BookWithReviews(BaseModel):
     id: int
-    book_reviews: list[ReviewPublic] = []
+    user_id: int
     title: str
     author: str
     description: str | None
-    user_id: int
+    book_reviews: list[ReviewPublic] = []
 
 
 class Token(BaseModel):
