@@ -42,6 +42,7 @@ async def get_users(
     limit: Annotated[int, Query(le=100)] = 100,
 ):
     """Получить всех пользователей"""
+    
     users = await user_repository.get_all_users(offset=offset, limit=limit)
     return users
 
@@ -49,6 +50,7 @@ async def get_users(
 @router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
 async def create_user(user: CreateUser, user_repository: UserRepositoryDep):
     """Регистрация пользователя"""
+
     hashed_password = hash_password(user.password)
     db_user = await user_repository.create_user(user, hashed_password)
     return db_user
