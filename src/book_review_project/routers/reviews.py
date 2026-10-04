@@ -19,11 +19,11 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 )
 async def create_review(
     review: Annotated[ReviewCreate, Body()],
-    review_repositry: ReviewRepositoryDep,
+    review_repository: ReviewRepositoryDep,
     current_user: CurrentUserDep,
 ):
 
-    db_review = await review_repositry.create_review(review, current_user=current_user)
+    db_review = await review_repository.create_review(review, current_user=current_user)
     if db_review is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Книга не найдена"

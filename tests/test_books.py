@@ -82,5 +82,5 @@ async def test_get_book_not_found(client: AsyncClient, logged_in_user):
         "/books/", json=payload, headers=logged_in_user["auth_header"]
     )
 
-    get_response: Response = await client.get(f"books/{2}")
+    get_response: Response = await client.get(f"books/{create_response.json()["id"] + 1}")
     assert get_response.status_code == 404

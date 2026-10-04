@@ -51,8 +51,11 @@ async def logged_in_user(client: AsyncClient):
         "password": "piterparker1234",
     }
     register_response: Response = await client.post("/users/", json=payload)
+    assert register_response.status_code == 201
     login_payload = {"username": payload["email"], "password": payload["password"]}
     login_response: Response = await client.post("/users/login", data=login_payload)
+    assert login_response.status_code == 200
     auth_header = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+    
 
     return {"user_id": register_response.json()["id"], "auth_header": auth_header}
