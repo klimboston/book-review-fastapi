@@ -10,12 +10,16 @@ async def create_user(client: AsyncClient):
         "password": "piterparker1234",
     }
     response: Response = await client.post("/users/", json=payload)
-    return {"payload": payload, "responce": response}
+    return {"payload": payload, "response": response}
 
 
-async def test_register_user(client: AsyncClient, create_user):
-    response: Response = create_user["responce"]
-    payload = create_user["payload"]
+async def test_register_user(client: AsyncClient):
+    payload = {
+        "username": "Petr1995",
+        "email": "petyapetrov@mail.ru",
+        "password": "piterparker1234",
+    }
+    response: Response = await client.post("/users/", json=payload)
     assert response.status_code == 201
     assert response.json()["id"] > 0
     assert response.json()["username"] == payload["username"]
@@ -77,10 +81,10 @@ async def test_login_missing_password(client: AsyncClient, create_user):
 
 async def test_get_user(client: AsyncClient, create_user):
     response: Response = await client.get(
-        f"/users/{create_user['responce'].json()['id']}"
+        f"/users/{create_user['response'].json()['id']}"
     )
     assert response.status_code == 200
-    assert response.json()["id"] == create_user["responce"].json()["id"]
+    assert response.json()["id"] == create_user["response"].json()["id"]
 
 
 @pytest.mark.parametrize("invalid_id", ["abc", "1.5", "-2", "null"])
