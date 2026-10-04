@@ -18,8 +18,7 @@ async def create_book(
     book_repository: BookRepositoryDep,
     current_user: CurrentUserDep,
 ):
-    book.user_id = current_user.id
-    db_book = await book_repository.create_book(book)
+    db_book = await book_repository.create_book(book, user_id=current_user.id)
     return db_book
 
 

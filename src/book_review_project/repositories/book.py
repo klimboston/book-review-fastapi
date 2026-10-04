@@ -3,14 +3,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.book_review_project.models import Book
+from src.book_review_project.schemas import CreateBook
 
 
 class BookRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_book(self, book):
-        db_book = Book(**book.model_dump())
+    async def create_book(self, book: CreateBook, user_id: int):
+        db_book = Book(**book.model_dump(), user_id=user_id)
         self.session.add(db_book)
         await self.session.commit()
         await self.session.refresh(db_book)

@@ -15,10 +15,12 @@ async def create_user(client: AsyncClient):
 
 async def test_register_user(client: AsyncClient, create_user):
     response: Response = create_user["responce"]
+    payload = create_user["payload"]
     assert response.status_code == 201
-    assert response.json()["id"]
-    assert response.json()["username"]
-    assert response.json()["email"]
+    assert response.json()["id"] > 0
+    assert response.json()["username"] == payload["username"]
+    assert response.json()["email"] == payload["email"]
+    assert "password" not in response.json()
 
 
 async def test_login_user(client: AsyncClient, create_user):
@@ -90,7 +92,7 @@ async def test_get_user_validation_errors(client: AsyncClient, invalid_id):
 @pytest.mark.parametrize(
     "invalid_email", ["abc", "1.5", True, "null", "123email@ mail.ru"]
 )
-async def test_register_invalid_email(client: AsyncClient, invalid_email, create_user):
+async def test_register_invalid_email(client: AsyncClient, invalid_email):
     payload = {
         "username": "Petr1995",
         "email": invalid_email,

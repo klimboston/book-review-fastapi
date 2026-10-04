@@ -39,15 +39,15 @@ class ReviewPublic(BaseModel):
 
 
 class ReviewCreate(BaseModel):
-    text: str
-    rating: int
+    text: str = Field(min_length=1, max_length=400)
+    rating: int = Field(ge=1, le=5)
     book_id: int
 
 
 class CreateBook(BaseModel):
     title: str
     author: str
-    description: str | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=500)
 
 class BookWithReviews(BaseModel):
     id: int

@@ -15,7 +15,7 @@ class Book(SQLModel, table=True):
     user_id: int | None = Field(default=None, foreign_key="user.id")
     title: str = Field(index=True)
     author: str = Field(index=True)
-    description: str | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=500)
     user: "User" = Relationship(back_populates="books")
     book_reviews: list["Review"] = Relationship(back_populates="book")
 

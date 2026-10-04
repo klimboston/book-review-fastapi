@@ -1,5 +1,5 @@
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx import ASGITransport, AsyncClient, Response
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel
@@ -42,3 +42,17 @@ async def client(session):
         yield ac
 
     app.dependency_overrides.clear()
+    
+@pytest.fixture
+async def logged_in_user(client: AsyncClient):
+    payload = {
+        "username": "Petr1995",
+        "email": "petyapetrov@mail.ru",
+        "password": "piterparker1234",
+    }
+    register_response: Response = await client.post("/users/", json=payload)
+    login_payload = {"username": payload["email"], "password": payload["password"]}
+    login_response: Response = await client.post("/users/login", data=login_payload)
+    auth_header = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
+
+    return {"user_id": register_response.json()["id"], "auth_header": auth_header}
