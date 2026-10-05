@@ -34,7 +34,6 @@ class UserWithBooks(BaseModel):
 class ChangeReview(BaseModel):
     text: str | None = Field(min_length=1, max_length=400, default=None)
     rating: int | None = Field(ge=1, le=5, default=None)    
-    id: int
 
 class ReviewPublic(BaseModel):
     id: int | None

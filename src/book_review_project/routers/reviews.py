@@ -89,7 +89,6 @@ async def change_review(
         )    
     if current_user.id != review.user_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет прав на удаление"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Нет прав на изменение"
         )
-    await review_repository.change_review(review=review, payload=payload)
-    return await review_repository.get_review_by_id(review_id=review_id)
+    return await review_repository.change_review(review=review, payload=payload)

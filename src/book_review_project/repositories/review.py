@@ -31,8 +31,8 @@ class ReviewRepository:
 
     async def change_review(self, review: Review, payload: ChangeReview):
         payload = payload.model_dump(exclude_unset=True)
-        statement = update(Review).where(Review.id == payload["id"]).values(**payload)
+        statement = update(Review).where(Review.id == review.id).values(**payload)
         await self.session.execute(statement)
         await self.session.commit()
-   
+        return await self.get_review_by_id(review.id)
         
