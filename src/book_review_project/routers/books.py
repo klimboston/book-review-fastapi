@@ -51,4 +51,4 @@ async def delete_book(book_id: Annotated[int, Path()], book_repository: BookRepo
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Книга не найдена")
     if book.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="У вас нет прав")
-    await book_repository.delete_book_by_id(book)
+    await book_repository.delete_book(book)

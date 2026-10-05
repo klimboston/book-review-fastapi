@@ -38,11 +38,14 @@ async def client(session):
 
     app.dependency_overrides[get_session] = get_override_session
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
 
     app.dependency_overrides.clear()
-    
+
+
 @pytest.fixture
 async def logged_in_user(client: AsyncClient):
     payload = {
@@ -56,6 +59,24 @@ async def logged_in_user(client: AsyncClient):
     login_response: Response = await client.post("/users/login", data=login_payload)
     assert login_response.status_code == 200
     auth_header = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
-    
 
+    return {"user_id": register_response.json()["id"], "auth_header": auth_header}
+
+
+@pytest.fixture
+async def another_logged_in_user(client: AsyncClient):
+    payload = {
+        "username": "Spiderman",
+        "email": "PiterParker@mail.ru",
+        "password": "secret_password",
+    }
+    register_response: Response = await client.post("/users/", json=payload)
+    assert register_response.status_code == 201
+    login_payload = {
+        "username": payload["email"],
+        "password": payload["password"],
+    }
+    login_response: Response = await client.post("/users/login", data=login_payload)
+    assert login_response.status_code == 200
+    auth_header = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
     return {"user_id": register_response.json()["id"], "auth_header": auth_header}

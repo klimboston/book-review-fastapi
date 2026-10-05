@@ -17,7 +17,7 @@ class BookRepository:
         await self.session.refresh(db_book)
         return db_book
 
-    async def get_book_by_id(self, book_id: int) -> Book:
+    async def get_book_by_id(self, book_id: int) -> Book | None:
         statement = (
             select(Book)
             .where(Book.id == book_id)
@@ -36,6 +36,6 @@ class BookRepository:
         books = (await self.session.execute(statement)).scalars().all()
         return books
 
-    async def delete_book_by_id(self, book: Book):
+    async def delete_book(self, book: Book):
         await self.session.delete(book)
         await self.session.commit()
