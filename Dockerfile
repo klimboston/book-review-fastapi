@@ -15,6 +15,8 @@ COPY --chown=app:app pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY --chown=app:app src/ ./src/
+COPY --chown=app:app alembic/ ./alembic/
+COPY --chown=app:app alembic.ini ./
 COPY --chown=app:app README.md ./
 
 ENV PATH="/app/.venv/bin:$PATH"
