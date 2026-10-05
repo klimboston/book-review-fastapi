@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from fastapi.security import OAuth2PasswordRequestForm
-
+from sqlalchemy.exc import IntegrityError
 from src.book_review_project.core.dependencies import UserRepositoryDep
 from src.book_review_project.core.security import (
     create_access_token,
@@ -52,8 +52,11 @@ async def create_user(user: CreateUser, user_repository: UserRepositoryDep):
     """Регистрация пользователя"""
 
     hashed_password = hash_password(user.password)
-    db_user = await user_repository.create_user(user, hashed_password)
-    return db_user
+    try:
+        db_user = await user_repository.create_user(user, hashed_password)
+        return db_user
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь с таким email уже существует")
 
 
 @router.post("/login", response_model=Token, status_code=200)

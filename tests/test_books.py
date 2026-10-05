@@ -109,7 +109,7 @@ async def test_delete_book_with_jwt(client: AsyncClient, logged_in_user, session
     review_response: Response = await client.post(
         "/reviews/", json=review_payload, headers=logged_in_user["auth_header"]
     )
-    
+
     assert review_response.status_code == status.HTTP_201_CREATED
 
     book_id = create_book_response.json()["id"]
@@ -198,3 +198,78 @@ async def test_delete_book_no_jwt(client: AsyncClient, logged_in_user):
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+async def test_get_book_reviews(client: AsyncClient, created_review: Response):
+    response: Response = await client.get(
+        f"/books/{created_review.json()['book_id']}/reviews"
+    )
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+async def test_get_book_reviews_not_found(
+    client: AsyncClient, created_review: Response
+):
+    response: Response = await client.get(
+        f"/books/{created_review.json()['book_id'] + 1}/reviews"
+    )
+    assert response.status_code == 404
+
+
+async def test_change_book_with_jwt(client: AsyncClient, logged_in_user):
+    create_book_payload = {
+        "title": "Название книги",
+        "author": "Автор",
+        "description": "Описание книги",
+    }
+    create_book_response: Response = await client.post(
+        "/books/", json=create_book_payload, headers=logged_in_user["auth_header"]
+    )
+    assert create_book_response.json()["title"] == create_book_payload["title"]
+
+    changed_payload = {"title": "Измененное название книги"}
+    response: Response = await client.patch(
+        f"/books/{create_book_response.json()['id']}",
+        json=changed_payload,
+        headers=logged_in_user["auth_header"],
+    )
+    assert response.status_code == 200
+    assert response.json()["title"] == changed_payload["title"]
+
+async def test_change_book_no_jwt(client: AsyncClient, logged_in_user):
+    create_book_payload = {
+        "title": "Название книги",
+        "author": "Автор",
+        "description": "Описание книги",
+    }
+    create_book_response: Response = await client.post(
+        "/books/", json=create_book_payload, headers=logged_in_user["auth_header"]
+    )
+    assert create_book_response.json()["title"] == create_book_payload["title"]
+
+    changed_payload = {"title": "Измененное название книги"}
+    response: Response = await client.patch(
+        f"/books/{create_book_response.json()['id']}",
+        json=changed_payload,
+    )
+    assert response.status_code == 401
+    
+async def test_change_book_is_forbidden(client: AsyncClient, logged_in_user, another_logged_in_user):
+    create_book_payload = {
+        "title": "Название книги",
+        "author": "Автор",
+        "description": "Описание книги",
+    }
+    create_book_response: Response = await client.post(
+        "/books/", json=create_book_payload, headers=logged_in_user["auth_header"]
+    )
+    assert create_book_response.json()["title"] == create_book_payload["title"]
+
+    changed_payload = {"title": "Измененное название книги"}
+    response: Response = await client.patch(
+        f"/books/{create_book_response.json()['id']}",
+        json=changed_payload,
+        headers=another_logged_in_user["auth_header"]
+    )
+    assert response.status_code == 403

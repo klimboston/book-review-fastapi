@@ -1,9 +1,9 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.book_review_project.models import Book
-from src.book_review_project.schemas import CreateBook
+from src.book_review_project.schemas import CreateBook, ChangeBook
 
 
 class BookRepository:
@@ -39,3 +39,9 @@ class BookRepository:
     async def delete_book(self, book: Book):
         await self.session.delete(book)
         await self.session.commit()
+        
+    async def change_book(self, book: Book, payload: ChangeBook):
+        statement = update(Book).where(Book.id==book.id).values(**payload.model_dump(exclude_unset=True))
+        await self.session.execute(statement)
+        result = await self.session.get(Book, book.id)
+        return result

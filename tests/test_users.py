@@ -25,6 +25,26 @@ async def test_register_user(client: AsyncClient):
     assert response.json()["username"] == payload["username"]
     assert response.json()["email"] == payload["email"]
     assert "password" not in response.json()
+    
+async def test_register_double_email(client: AsyncClient):
+    payload = {
+        "username": "Petr1995",
+        "email": "petyapetrov@mail.ru",
+        "password": "piterparker1234",
+    }
+    response: Response = await client.post("/users/", json=payload)
+    assert response.status_code == 201
+    assert response.json()["id"] > 0
+    assert response.json()["username"] == payload["username"]
+    assert response.json()["email"] == payload["email"]
+    assert "password" not in response.json()
+    payload = {
+        "username": "Parker",
+        "email": "petyapetrov@mail.ru",
+        "password": "asdf",
+    }
+    response: Response = await client.post("/users/", json=payload)
+    assert response.status_code == 409
 
 
 async def test_login_user(client: AsyncClient, create_user):

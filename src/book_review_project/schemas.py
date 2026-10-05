@@ -49,9 +49,14 @@ class ReviewCreate(BaseModel):
 
 
 class CreateBook(BaseModel):
-    title: str
+    title: str = Field(min_length=1, max_length=100)
     author: str
     description: str | None = Field(default=None, max_length=500)
+    
+class ChangeBook(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    author: str | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=500)    
 
 class BookWithReviews(BaseModel):
     id: int

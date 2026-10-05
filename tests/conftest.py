@@ -80,3 +80,25 @@ async def another_logged_in_user(client: AsyncClient):
     assert login_response.status_code == 200
     auth_header = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
     return {"user_id": register_response.json()["id"], "auth_header": auth_header}
+
+@pytest.fixture
+async def created_review(client: AsyncClient, logged_in_user):
+    """Фикстура созданного отзыва"""
+    
+    create_book_payload = {
+        "title": "Название книги",
+        "author": "Автор",
+        "description": "Описание книги",
+    }
+    create_book_response: Response = await client.post(
+        "/books/", json=create_book_payload, headers=logged_in_user["auth_header"]
+    )
+    create_review_payload = {
+        "text": "Текст отзыва",
+        "rating": 5,
+        "book_id": create_book_response.json()["id"],
+    }
+    created_review_response: Response = await client.post(
+        "/reviews/", json=create_review_payload, headers=logged_in_user["auth_header"]
+    )
+    return created_review_response

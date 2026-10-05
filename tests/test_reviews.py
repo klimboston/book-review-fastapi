@@ -3,29 +3,6 @@ from fastapi import status
 from httpx import AsyncClient, Response
 
 
-@pytest.fixture
-async def created_review(client: AsyncClient, logged_in_user):
-    """Фикстура созданного отзыва"""
-    
-    create_book_payload = {
-        "title": "Название книги",
-        "author": "Автор",
-        "description": "Описание книги",
-    }
-    create_book_response: Response = await client.post(
-        "/books/", json=create_book_payload, headers=logged_in_user["auth_header"]
-    )
-    create_review_payload = {
-        "text": "Текст отзыва",
-        "rating": 5,
-        "book_id": create_book_response.json()["id"],
-    }
-    created_review_response: Response = await client.post(
-        "/reviews/", json=create_review_payload, headers=logged_in_user["auth_header"]
-    )
-    return created_review_response
-
-
 async def test_create_review(client: AsyncClient, logged_in_user):
     create_book_payload = {
         "title": "Название книги",
@@ -157,7 +134,7 @@ async def test_delete_review_by_invalid_id(client: AsyncClient, invalid_id, logg
 async def test_change_review_with_jwt(client: AsyncClient, logged_in_user, created_review: Response):
     payload = {
         "text": "Измененный текст отзыва",
-        "id": created_review.json()["id"]
+
     }
     response: Response = await client.patch(f"/reviews/{created_review.json()["id"]}", json=payload, headers=logged_in_user["auth_header"])
     print(response.json())
@@ -167,7 +144,7 @@ async def test_change_review_with_jwt(client: AsyncClient, logged_in_user, creat
     assert response.json()["text"] == payload["text"]
     payload = {
         "rating": 2,
-        "id": created_review.json()["id"]
+
     }
     response: Response = await client.patch(f"/reviews/{created_review.json()["id"]}", json=payload, headers=logged_in_user["auth_header"])
     assert response.status_code == 200
@@ -176,7 +153,7 @@ async def test_change_review_with_jwt(client: AsyncClient, logged_in_user, creat
 async def test_change_review_no_jwt(client: AsyncClient, created_review: Response):
     payload = {
         "text": "Измененный текст отзыва",
-        "id": created_review.json()["id"]
+
     }
     response: Response = await client.patch(f"/reviews/{created_review.json()["id"]}", json=payload)
 
@@ -185,7 +162,7 @@ async def test_change_review_no_jwt(client: AsyncClient, created_review: Respons
 async def test_change_review_is_forbidden(client: AsyncClient, created_review: Response, logged_in_user, another_logged_in_user):
     payload = {
         "text": "Измененный текст отзыва",
-        "id": created_review.json()["id"]
+
     }
     response: Response = await client.patch(f"/reviews/{created_review.json()["id"]}", json=payload, headers=another_logged_in_user["auth_header"])
 
@@ -195,7 +172,7 @@ async def test_change_review_is_forbidden(client: AsyncClient, created_review: R
 async def test_change_review_not_found(client: AsyncClient, logged_in_user, created_review: Response):
     payload = {
         "text": "Измененный текст отзыва",
-        "id": created_review.json()["id"]
+
     }
     response: Response = await client.patch(f"/reviews/{created_review.json()["id"] + 1}", headers=logged_in_user["auth_header"], json=payload)
     assert response.status_code == 404
