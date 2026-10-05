@@ -83,7 +83,7 @@ async def get_book_reviews(
 @router.patch(
     "/{book_id}",
     status_code=status.HTTP_200_OK,
-    response_model=Book,
+    response_model=BookWithReviews,
     summary="Изменить книгу",
 )
 async def change_book(

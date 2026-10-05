@@ -236,6 +236,9 @@ async def test_change_book_with_jwt(client: AsyncClient, logged_in_user):
     )
     assert response.status_code == 200
     assert response.json()["title"] == changed_payload["title"]
+    responce_saved_in_bd: Response = await client.get(f"/books/{response.json()["id"]}")
+
+    assert responce_saved_in_bd.json() == response.json()
 
 async def test_change_book_no_jwt(client: AsyncClient, logged_in_user):
     create_book_payload = {

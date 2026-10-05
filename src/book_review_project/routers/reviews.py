@@ -7,7 +7,8 @@ from src.book_review_project.core.dependencies import (
     ReviewRepositoryDep,
 )
 from src.book_review_project.models import Review
-from src.book_review_project.schemas import ReviewCreate, ChangeReview
+from src.book_review_project.schemas import ChangeReview, ReviewCreate
+from src.book_review_project.services.review_service import ReviewService
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -23,14 +24,7 @@ async def create_review(
     review_repository: ReviewRepositoryDep,
     current_user: CurrentUserDep,
 ):
-
-    db_review = await review_repository.create_review(review, current_user=current_user)
-    if db_review is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Книга не найдена"
-        )
-
-    return db_review
+    return await ReviewService(review_repository).create_review(review, current_user)
 
 
 @router.get(
@@ -42,12 +36,7 @@ async def create_review(
 async def get_review(
     review_id: Annotated[int, Path()], review_repository: ReviewRepositoryDep
 ):
-    review = await review_repository.get_review_by_id(review_id=review_id)
-    if review is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Отзыв не найден"
-        )
-    return review
+    return await ReviewService(review_repository).get_review(review_id)
 
 
 @router.delete(
@@ -58,16 +47,7 @@ async def delete_review(
     review_repository: ReviewRepositoryDep,
     current_user: CurrentUserDep,
 ):
-    review = await review_repository.get_review_by_id(review_id=review_id)
-    if review is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Отзыв не найден"
-        )
-    if current_user.id != review.user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет прав на удаление"
-        )
-    await review_repository.delete_review(review)
+    await ReviewService(review_repository).delete_review(review_id, current_user)
 
 
 @router.patch(
@@ -82,13 +62,6 @@ async def change_review(
     review_repository: ReviewRepositoryDep,
     current_user: CurrentUserDep,
 ):
-    review = await review_repository.get_review_by_id(review_id=review_id)
-    if review is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Отзыв не найден"
-        )    
-    if current_user.id != review.user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет прав на изменение"
-        )
-    return await review_repository.change_review(review=review, payload=payload)
+    return await ReviewService(review_repository).change_review(
+        review_id, current_user, payload=payload
+    )

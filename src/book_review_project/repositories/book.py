@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.book_review_project.models import Book
-from src.book_review_project.schemas import CreateBook, ChangeBook
+from src.book_review_project.schemas import ChangeBook, CreateBook
 
 
 class BookRepository:

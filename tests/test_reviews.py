@@ -144,7 +144,6 @@ async def test_change_review_with_jwt(client: AsyncClient, logged_in_user, creat
     assert response.json()["text"] == payload["text"]
     payload = {
         "rating": 2,
-
     }
     response: Response = await client.patch(f"/reviews/{created_review.json()["id"]}", json=payload, headers=logged_in_user["auth_header"])
     assert response.status_code == 200
