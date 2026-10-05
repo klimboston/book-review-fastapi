@@ -56,6 +56,7 @@ async def create_user(user: CreateUser, user_repository: UserRepositoryDep):
         db_user = await user_repository.create_user(user, hashed_password)
         return db_user
     except IntegrityError:
+        await user_repository.session.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь с таким email уже существует")
 
 

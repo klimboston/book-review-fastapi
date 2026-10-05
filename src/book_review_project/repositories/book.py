@@ -43,5 +43,7 @@ class BookRepository:
     async def change_book(self, book: Book, payload: ChangeBook):
         statement = update(Book).where(Book.id==book.id).values(**payload.model_dump(exclude_unset=True))
         await self.session.execute(statement)
+        await self.session.commit()
         result = await self.session.get(Book, book.id)
+        
         return result
