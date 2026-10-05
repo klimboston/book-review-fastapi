@@ -10,13 +10,23 @@ class Settings(BaseSettings):
     DB_HOST: str | None = None
     DB_PORT: int | None = None
     
+    DB_HOST_ALEMBIC: str | None = None
+    DB_PORT_ALEMBIC: str | None = None
+    
     DATABASE_URL: str | None = None
+    ALEMBIC_DATABASE_URL: str | None = None
     
     @property
     def database_url(self) -> str:
         if self.DATABASE_URL:
             return self.DATABASE_URL
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    def alembic_database_url(self) -> str:
+        if self.ALEMBIC_DATABASE_URL:
+            return self.ALEMBIC_DATABASE_URL
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST_ALEMBIC}:{self.DB_PORT_ALEMBIC}/{self.DB_NAME}"
     
     model_config = SettingsConfigDict(env_file=".env")
         
