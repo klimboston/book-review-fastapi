@@ -17,13 +17,13 @@ class Book(SQLModel, table=True):
     author: str = Field(index=True)
     description: str | None = Field(default=None, max_length=500)
     user: "User" = Relationship(back_populates="books")
-    book_reviews: list["Review"] = Relationship(back_populates="book")
+    book_reviews: list["Review"] = Relationship(back_populates="book", cascade_delete=True, passive_deletes=True)
 
 
 class Review(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int | None = Field(default=None, foreign_key="user.id")
-    book_id: int | None = Field(default=None, foreign_key="book.id")
+    book_id: int | None = Field(default=None, foreign_key="book.id", ondelete="CASCADE")
     text: str = Field(max_length=1000)
     rating: int = Field(ge=1, le=5)
     user: "User" = Relationship(back_populates="user_reviews")
