@@ -11,6 +11,7 @@ from src.book_review_project.models import User
 from src.book_review_project.repositories.book import BookRepository
 from src.book_review_project.repositories.review import ReviewRepository
 from src.book_review_project.repositories.user import UserRepository
+from src.book_review_project.services.review_service import ReviewService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
@@ -83,3 +84,8 @@ ReviewRepositoryDep = Annotated[ReviewRepository, Depends(get_review_repository)
 Зависимость для работы с репозиторием таблицы Review, возвращает экземпляр
 ReviewRepository(session)
 """
+
+def get_review_service(repository: ReviewRepositoryDep):
+    return ReviewService(repository)
+
+ReviewServiceDep = Annotated[ReviewService, Depends(get_review_service)]

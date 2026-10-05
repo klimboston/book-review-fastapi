@@ -5,6 +5,7 @@ from fastapi import APIRouter, Body, HTTPException, Path, status
 from src.book_review_project.core.dependencies import (
     CurrentUserDep,
     ReviewRepositoryDep,
+    ReviewServiceDep,
 )
 from src.book_review_project.models import Review
 from src.book_review_project.schemas import ChangeReview, ReviewCreate
@@ -21,10 +22,10 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 )
 async def create_review(
     review: Annotated[ReviewCreate, Body()],
-    review_repository: ReviewRepositoryDep,
+    review_service: ReviewServiceDep,
     current_user: CurrentUserDep,
 ):
-    return await ReviewService(review_repository).create_review(review, current_user)
+    return await review_service.create_review(review, current_user)
 
 
 @router.get(
@@ -34,9 +35,9 @@ async def create_review(
     summary="Получить отзыв",
 )
 async def get_review(
-    review_id: Annotated[int, Path()], review_repository: ReviewRepositoryDep
+    review_id: Annotated[int, Path()], review_service: ReviewServiceDep
 ):
-    return await ReviewService(review_repository).get_review(review_id)
+    return await review_service.get_review(review_id)
 
 
 @router.delete(
@@ -44,10 +45,10 @@ async def get_review(
 )
 async def delete_review(
     review_id: Annotated[int, Path()],
-    review_repository: ReviewRepositoryDep,
+    review_service: ReviewServiceDep,
     current_user: CurrentUserDep,
 ):
-    await ReviewService(review_repository).delete_review(review_id, current_user)
+    await review_service.delete_review(review_id, current_user)
 
 
 @router.patch(
@@ -59,9 +60,9 @@ async def delete_review(
 async def change_review(
     review_id: Annotated[int, Path()],
     payload: Annotated[ChangeReview, Body()],
-    review_repository: ReviewRepositoryDep,
+    review_service: ReviewServiceDep,
     current_user: CurrentUserDep,
 ):
-    return await ReviewService(review_repository).change_review(
+    return await review_service.change_review(
         review_id, current_user, payload=payload
     )
