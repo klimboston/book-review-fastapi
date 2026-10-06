@@ -4,19 +4,19 @@
 
 ## 🚀 Стек
 
-**Python**: 3.14+;
-**Web framework**: FastAPI;
-**ORM / database toolkit**: SQLModel, SQLAlchemy;
-**Database**: PostgreSQL 17;
-**Async driver**: asyncpg;
-**Migrations**: Alembic;
-**Validation / configuration**: Pydantic, Pydantic Settings;
-**Authentication**: JWT / OAuth2 Bearer;
-**Password hashing**: bcrypt;
-**Package manager**: uv;
-**Testing**: pytest, pytest-asyncio, HTTPX, aiosqlite;
-**Containerization**: Docker, Docker Compose;
-**CI**: GitHub Actions;
+* **Python**: 3.14+;
+* **Web framework**: FastAPI;
+* **ORM / database toolkit**: SQLModel, SQLAlchemy;
+* **Database**: PostgreSQL 17;
+* **Async driver**: asyncpg;
+* **Migrations**: Alembic;
+* **Validation / configuration**: Pydantic, Pydantic Settings;
+* **Authentication**: JWT / OAuth2 Bearer;
+* **Password hashing**: bcrypt;
+* **Package manager**: uv;
+* **Testing**: pytest, pytest-asyncio, HTTPX, aiosqlite;
+* **Containerization**: Docker, Docker Compose;
+* **CI**: GitHub Actions;
 
 ---
 
@@ -112,9 +112,9 @@ uv sync --locked
 pytest
    ↓
 ✅ / ❌
-```text
----
+```
 
+---
 ## 📂 Структура проекта
 
 ```text
