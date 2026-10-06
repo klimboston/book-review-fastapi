@@ -4,22 +4,35 @@
 
 ## 🚀 Стек
 
-* **Язык:** Python 3.14+
-* **Фреймворк:** FastAPI
-* **ORM & База данных:** SQLModel / SQLAlchemy + асинхронный драйвер `asyncpg` + PostgreSQL 17
-* **Безопасность & Настройки:** PyJWT (стандарт OAuth2), Bcrypt (хеширование паролей), Pydantic-settings
-* **Окружение & Сборка:** Docker, Docker Compose, Менеджер пакетов `uv`
-* **Тестирование:** Pytest + `pytest-asyncio` + `aiosqlite` (изолированные интеграционные тесты в памяти)
+**Python**: 3.14+
+**Web framework**: FastAPI
+**ORM / database toolkit**: SQLModel, SQLAlchemy
+**Database**: PostgreSQL 17
+**Async driver**: asyncpg
+**Migrations**: Alembic
+**Validation / configuration**: Pydantic, Pydantic Settings
+**Authentication**: JWT / OAuth2 Bearer
+**Password hashing**: bcrypt
+**Package manager**: uv
+**Testing**: pytest, pytest-asyncio, HTTPX, aiosqlite
+**Containerization**: Docker, Docker Compose
+**CI**: GitHub Actions
 
 ---
 
 ## 🏗️ Архитектурные особенности проекта
 
-* **Модульная структура (src-layout):** Логика приложения строго разделена по роутерам (`routers/`), зависимостям (`dependencies.py`) и конфигурациям.
-* **Надежная авторизация:** Реализована полноценная система регистрации и логина. Сервер выдает безопасные JWT-токены (стандарт Bearer), а кастомная зависимость `get_current_user` автоматически защищает эндпоинты.
-* **Защита данных (Eager Loading):** Для предотвращения классической асинхронной ошибки `MissingGreenlet` все связанные сущности (книги, авторы, отзывы) подгружаются жадно с помощью механизма `selectinload`.
-* **Clean Code & Безопасность:** Секретные ключи шифрования вынесены в переменные окружения `.env`. Входящие данные строго валидируются Pydantic-схемами, а пароли никогда не хранятся в БД в чистом виде.
+API предоставляет следующие основные возможности:
 
+* регистрация пользователей;
+* авторизация пользователей с выдачей JWT access token;
+* получение пользователей;
+* создание, получение и изменение книг;
+* создание и получение отзывов;
+* проверка прав доступа через JWT;
+* валидация входных данных;
+* обработка конфликтов, например регистрации с уже существующим email;
+* каскадное удаление отзывов при удалении книги.
 ---
 
 ## 🛠️ Быстрый запуск через Docker Compose 🐳
@@ -35,7 +48,10 @@
    DB_NAME=book_review_database
    DB_HOST=db
    DB_PORT=5432
+   DB_HOST_ALEMBIC=localhost
+   DB_PORT_ALEMBIC=5433
    ```
+   DB_HOST_ALEMBIC и DB_PORT_ALEMBIC используются для локального запуска Alembic. При запуске в Docker Compose они автоматически переопределяются для подключения к сервису PostgreSQL.
 
 2. **Запустите сборку и старт контейнеров:**
    ```bash
@@ -48,10 +64,23 @@
 4. **Остановка проекта:** Для завершения работы контейнеров нажмите `Ctrl + C` в терминале.
 
 ---
+## 🗄️ Миграции базы данных
+Для управления схемой PostgreSQL используется Alembic.
 
+Создание новой миграции после изменения моделей:
+
+uv run alembic revision --autogenerate -m "описание изменения"
+
+Применение миграций:
+
+uv run alembic upgrade head
+
+В Docker миграции применяются автоматически при запуске проекта.
+
+---
 ## 🧪 Запуск автоматических тестов (`pytest`)
 
-Тесты полностью изолированы. При запуске `pytest` приложение автоматически подменяет боевую базу данных PostgreSQL на асинхронную SQLite в памяти (`test.db`), разворачивает чистые таблицы, симулирует действия пользователя через `TestClient` и бесследно стирает данные после проверок.
+Тесты полностью изолированы. При запуске `uv run pytest` приложение автоматически подменяет боевую базу данных PostgreSQL на асинхронную SQLite, разворачивает чистые таблицы, симулирует действия пользователя через `AsyncClient` и стирает данные после проверок.
 
 Для запуска тестов локально (из среды WSL/Linux):
 
@@ -61,28 +90,66 @@
    ```
 2. Запустите тестовую сессию:
    ```bash
-   uv run python -m pytest -v
+   uv run pytest -v
    ```
+Тесты проверяют регистрацию и авторизацию пользователей, JWT-аутентификацию, работу с книгами и отзывами, валидацию входных данных и обработку ошибок.
 
+---
+## 🔄 Continuous Integration (CI)
+Для автоматической проверки проекта используется GitHub Actions.
+CI запускается при push в main и при создании Pull Request в main.
+Pipeline:
+Checkout
+   ↓
+Python 3.14
+   ↓
+uv
+   ↓
+uv sync --locked
+   ↓
+pytest
+   ↓
+✅ / ❌
 ---
 
 ## 📂 Структура проекта
 
 ```text
-├── src/
-│   └── book_review_project/
-│       ├── routers/             # Модульные эндпоинты (users, books, reviews)
-│       ├── config.py            # Валидация настроек Pydantic-settings
-│       ├── database.py          # Инициализация асинхронного AsyncEngine
-│       ├── dependencies.py      # Перехватчики сессий БД и JWT-авторизации
-│       ├── main.py              # Точка входа FastAPI и lifespan-события
-│       ├── models.py            # Описание таблиц БД и Pydantic-схем ответов
-│       └── security.py          # Утилиты хеширования bcrypt и кодирования токенов
-├── tests/
-│   ├── conftest.py          # Фикстуры тестов, создание тестовой БД в памяти
-│   └── test_users.py        # Интеграционные тесты регистрации и логина
-├── Dockerfile               # Инструкция сборки Docker-образа приложения
-├── docker-compose.yaml      # Оркестрация сервисов приложения и СУБД PostgreSQL
-├── pyproject.toml           # Конфигурация проекта и зависимостей uv
-└── README.md                # Документация проекта
+src/
+└── book_review_project/
+    ├── core/
+    │   ├── config.py           # Настройки приложения и переменные окружения
+    │   ├── database.py         # AsyncEngine и фабрика асинхронных сессий
+    │   ├── dependencies.py     # FastAPI dependencies, БД и JWT
+    │   └── security.py         # JWT и хеширование паролей
+    │
+    ├── repositories/
+    │   ├── user.py             # Запросы к таблице User
+    │   ├── book.py             # Запросы к таблице Book
+    │   └── review.py           # Запросы к таблице Review
+    │
+    ├── services/
+    │   └── review_service.py   # Логика работы с отзывами
+    │
+    ├── routers/
+    │   ├── users.py            # User endpoints
+    │   ├── books.py            # Book endpoints
+    │   └── reviews.py          # Review endpoints
+    │
+    ├── models.py               # SQLModel-модели таблиц БД
+    ├── schemas.py              # Pydantic-схемы запросов и ответов
+    └── main.py                 # Создание FastAPI-приложения
+
+tests/
+├── conftest.py
+├── test_users.py
+├── test_books.py
+└── test_reviews.py
+
+alembic/
+├── env.py
+└── versions/
+    └── 2274c41a60df_initial_migration.py
+
+
 ```
