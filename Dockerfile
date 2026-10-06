@@ -4,7 +4,7 @@ RUN useradd -m app
 
 WORKDIR /app
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.7 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /uvx /bin/
 
 RUN chown app:app /app
 

@@ -30,7 +30,7 @@ async def test_register_min_length_password_user(client: AsyncClient):
     payload = {
         "username": "Petr1995",
         "email": "petyapetrov@mail.ru",
-        "password": "1234123412",
+        "password": "1234",
     }
     response: Response = await client.post("/users/", json=payload)
     assert response.status_code == 422
@@ -50,7 +50,7 @@ async def test_register_double_email(client: AsyncClient):
     payload = {
         "username": "Parker",
         "email": "petyapetrov@mail.ru",
-        "password": "asdf",
+        "password": "piterparker1234",
     }
     response: Response = await client.post("/users/", json=payload)
     assert response.status_code == 409
