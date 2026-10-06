@@ -4,19 +4,19 @@
 
 ## 🚀 Стек
 
-**Python**: 3.14+
-**Web framework**: FastAPI
-**ORM / database toolkit**: SQLModel, SQLAlchemy
-**Database**: PostgreSQL 17
-**Async driver**: asyncpg
-**Migrations**: Alembic
-**Validation / configuration**: Pydantic, Pydantic Settings
-**Authentication**: JWT / OAuth2 Bearer
-**Password hashing**: bcrypt
-**Package manager**: uv
-**Testing**: pytest, pytest-asyncio, HTTPX, aiosqlite
-**Containerization**: Docker, Docker Compose
-**CI**: GitHub Actions
+**Python**: 3.14+;
+**Web framework**: FastAPI;
+**ORM / database toolkit**: SQLModel, SQLAlchemy;
+**Database**: PostgreSQL 17;
+**Async driver**: asyncpg;
+**Migrations**: Alembic;
+**Validation / configuration**: Pydantic, Pydantic Settings;
+**Authentication**: JWT / OAuth2 Bearer;
+**Password hashing**: bcrypt;
+**Package manager**: uv;
+**Testing**: pytest, pytest-asyncio, HTTPX, aiosqlite;
+**Containerization**: Docker, Docker Compose;
+**CI**: GitHub Actions;
 
 ---
 
@@ -80,7 +80,7 @@ uv run alembic upgrade head
 ---
 ## 🧪 Запуск автоматических тестов (`pytest`)
 
-Тесты полностью изолированы. При запуске `uv run pytest` приложение автоматически подменяет боевую базу данных PostgreSQL на асинхронную SQLite, разворачивает чистые таблицы, симулирует действия пользователя через `AsyncClient` и стирает данные после проверок.
+Тесты полностью изолированы. При запуске `uv run pytest` приложение автоматически подменяет PostgreSQL на асинхронную SQLite, разворачивает чистые таблицы, симулирует действия пользователя через `AsyncClient` и стирает данные после проверок.
 
 Для запуска тестов локально (из среды WSL/Linux):
 
@@ -96,9 +96,11 @@ uv run alembic upgrade head
 
 ---
 ## 🔄 Continuous Integration (CI)
+
 Для автоматической проверки проекта используется GitHub Actions.
 CI запускается при push в main и при создании Pull Request в main.
 Pipeline:
+```text
 Checkout
    ↓
 Python 3.14
@@ -110,6 +112,7 @@ uv sync --locked
 pytest
    ↓
 ✅ / ❌
+```text
 ---
 
 ## 📂 Структура проекта
@@ -150,6 +153,4 @@ alembic/
 ├── env.py
 └── versions/
     └── 2274c41a60df_initial_migration.py
-
-
 ```
