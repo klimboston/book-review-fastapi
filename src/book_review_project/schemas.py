@@ -16,7 +16,7 @@ class CreateUser(BaseModel):
 
     username: str
     email: EmailStr
-    password: str
+    password: str = Field(min_length=7)
 
 
 class UserLogin(BaseModel):
