@@ -53,6 +53,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  go-service:
+    build: ./go-service
+    container_name: book-review-go
+
+    expose:
+      - "8081"
+
+    restart: unless-stopped
+
 volumes:
   postgres_data:
 

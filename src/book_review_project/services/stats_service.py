@@ -20,7 +20,7 @@ class StatsService:
 
         async with AsyncClient() as client:
             response: Response = await client.post(
-                "http://localhost:8081/stats", json={"ratings": ratings}
+                "http://go-service:8081/stats", json={"ratings": ratings}
             )
         if response.status_code != status.HTTP_200_OK:
             raise HTTPException(status_code=response.status_code)
