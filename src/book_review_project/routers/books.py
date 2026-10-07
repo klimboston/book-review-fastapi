@@ -7,7 +7,13 @@ from src.book_review_project.core.dependencies import (
     CurrentUserDep,
 )
 from src.book_review_project.models import Book, Review
-from src.book_review_project.schemas import BookWithReviews, CreateBook, ChangeBook
+from src.book_review_project.schemas import (
+    BookStats,
+    BookWithReviews,
+    ChangeBook,
+    CreateBook,
+)
+from src.book_review_project.services.stats_service import StatsService
 
 router = APIRouter(prefix="/books", tags=["books"])
 
@@ -102,3 +108,15 @@ async def change_book(
             status_code=status.HTTP_403_FORBIDDEN, detail="У вас нет прав"
         )
     return await book_repository.change_book(book, payload)
+
+
+@router.get(
+    "/{book_id}/stats",
+    status_code=status.HTTP_200_OK,
+    summary="Получить статистику отзывов книги",
+    response_model=BookStats,
+)
+async def get_book_stats(
+    book_id: Annotated[int, Path()], book_repository: BookRepositoryDep
+):
+    return await StatsService(book_repository).get_book_stats(book_id=book_id)

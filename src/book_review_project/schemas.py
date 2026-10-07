@@ -33,7 +33,8 @@ class UserWithBooks(BaseModel):
 
 class ChangeReview(BaseModel):
     text: str | None = Field(min_length=1, max_length=400, default=None)
-    rating: int | None = Field(ge=1, le=5, default=None)    
+    rating: int | None = Field(ge=1, le=5, default=None)
+
 
 class ReviewPublic(BaseModel):
     id: int | None
@@ -52,11 +53,13 @@ class CreateBook(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     author: str
     description: str | None = Field(default=None, max_length=500)
-    
+
+
 class ChangeBook(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=100)
     author: str | None = Field(default=None)
-    description: str | None = Field(default=None, max_length=500)    
+    description: str | None = Field(default=None, max_length=500)
+
 
 class BookWithReviews(BaseModel):
     id: int
@@ -65,6 +68,11 @@ class BookWithReviews(BaseModel):
     author: str
     description: str | None
     book_reviews: list[ReviewPublic] = []
+    
+
+class BookStats(BaseModel):
+    reviews_count: int
+    average_rating: float
 
 
 class Token(BaseModel):
