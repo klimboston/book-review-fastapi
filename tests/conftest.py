@@ -4,7 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel
 
-from src.book_review_project.core.dependencies import get_session
+from src.book_review_project.core.dependencies import (
+    get_rabbitmq_publisher,
+    get_session,
+)
 from src.book_review_project.main import app
 
 test_engine = create_async_engine(
@@ -16,6 +19,23 @@ test_engine = create_async_engine(
 TestSession = async_sessionmaker(
     bind=test_engine, class_=AsyncSession, expire_on_commit=False
 )
+
+
+class FakeRabbitMQPublisher:
+    async def publish_review_created(
+        self,
+        review_id: int,
+        book_id: int,
+        rating: int,
+    ) -> None:
+        pass
+
+
+fake_publisher = FakeRabbitMQPublisher()
+
+
+def override_rabbitmq_publisher():
+    return fake_publisher
 
 
 @pytest.fixture()
@@ -37,6 +57,7 @@ async def client(session):
         yield session
 
     app.dependency_overrides[get_session] = get_override_session
+    app.dependency_overrides[get_rabbitmq_publisher] = override_rabbitmq_publisher
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
@@ -81,10 +102,11 @@ async def another_logged_in_user(client: AsyncClient):
     auth_header = {"Authorization": f"Bearer {login_response.json()['access_token']}"}
     return {"user_id": register_response.json()["id"], "auth_header": auth_header}
 
+
 @pytest.fixture
 async def created_review(client: AsyncClient, logged_in_user):
     """Фикстура созданного отзыва"""
-    
+
     create_book_payload = {
         "title": "Название книги",
         "author": "Автор",
