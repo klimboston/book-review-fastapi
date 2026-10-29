@@ -17,6 +17,10 @@ jobs:
       SECRET_KEY: ci-test-secret-key
       ALGORITHM: HS256
       DATABASE_URL: sqlite+aiosqlite://
+      RABBITMQ_HOST: localhost
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USER: test
+      RABBITMQ_PASSWORD: test
 
 
     steps:
