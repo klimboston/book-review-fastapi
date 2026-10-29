@@ -4,6 +4,7 @@ from fastapi import APIRouter, Body, HTTPException, Path, status
 
 from src.book_review_project.core.dependencies import (
     CurrentUserDep,
+    RabbitPublisherDep,
     ReviewRepositoryDep,
     ReviewServiceDep,
 )
@@ -24,8 +25,15 @@ async def create_review(
     review: Annotated[ReviewCreate, Body()],
     review_service: ReviewServiceDep,
     current_user: CurrentUserDep,
+    publisher: RabbitPublisherDep,
 ):
-    return await review_service.create_review(review, current_user)
+    created_review = await review_service.create_review(review, current_user)
+
+    await publisher.publish_review_created(
+        created_review.id, created_review.book_id, created_review.rating
+    )
+
+    return created_review
 
 
 @router.get(
@@ -63,6 +71,4 @@ async def change_review(
     review_service: ReviewServiceDep,
     current_user: CurrentUserDep,
 ):
-    return await review_service.change_review(
-        review_id, current_user, payload=payload
-    )
+    return await review_service.change_review(review_id, current_user, payload=payload)

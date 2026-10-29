@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -49,6 +50,11 @@ func StatsHadler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fmt.Println("Successful")
 	http.HandleFunc("/stats", StatsHadler)
+	go func() {
+		if err := consumeReviewCreated(); err != nil {
+			log.Printf("RabbitMQ consumer stopped: %v", err)
+		}
+	}()
 	http.ListenAndServe(":8081", nil)
 
 }

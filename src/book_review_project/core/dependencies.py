@@ -1,10 +1,11 @@
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.book_review_project.services.rabbitmq_publisher import RabbitMQPublisher
 from src.book_review_project.core.database import async_session_maker
 from src.book_review_project.core.security import ALGORITHM, SECRET_KEY
 from src.book_review_project.models import User
@@ -49,6 +50,13 @@ async def get_current_user(
     return user
 
 
+async def get_rabbitmq_publisher(request: Request) -> RabbitMQPublisher:
+    return request.app.state.rabbitmq_publisher
+
+
+RabbitPublisherDep = Annotated[RabbitMQPublisher, Depends(get_rabbitmq_publisher)]
+
+
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
 """
 Зависимость для проверки пользователя на наличие валидного JWT токена.
@@ -69,6 +77,7 @@ UserRepository(session)
 def get_book_repository(session: SessionDep):
     return BookRepository(session)
 
+
 BookRepositoryDep = Annotated[BookRepository, Depends(get_book_repository)]
 """
 Зависимость для работы с репозиторием таблицы Book, возвращает экземпляр
@@ -76,9 +85,9 @@ BookRepository(session)
 """
 
 
-
 def get_review_repository(session: SessionDep):
     return ReviewRepository(session)
+
 
 ReviewRepositoryDep = Annotated[ReviewRepository, Depends(get_review_repository)]
 """
@@ -86,7 +95,9 @@ ReviewRepositoryDep = Annotated[ReviewRepository, Depends(get_review_repository)
 ReviewRepository(session)
 """
 
+
 def get_review_service(repository: ReviewRepositoryDep):
     return ReviewService(repository)
+
 
 ReviewServiceDep = Annotated[ReviewService, Depends(get_review_service)]

@@ -16,6 +16,18 @@ class Settings(BaseSettings):
     DATABASE_URL: str | None = None
     ALEMBIC_DATABASE_URL: str | None = None
     
+    RABBITMQ_HOST: str
+    RABBITMQ_PORT: int
+    RABBITMQ_USER: str
+    RABBITMQ_PASSWORD: str
+    RABBITMQ_URL: str | None = None
+    
+    @property
+    def rabbitmq_url(self) -> str:
+        if self.RABBITMQ_URL:
+            return self.RABBITMQ_URL
+        return f"amqp://{self.RABBITMQ_USER}:{self.RABBITMQ_PASSWORD}@{self.RABBITMQ_HOST}:{self.RABBITMQ_PORT}/"
+    
     @property
     def database_url(self) -> str:
         if self.DATABASE_URL:

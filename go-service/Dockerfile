@@ -2,10 +2,12 @@ FROM golang:1.26-alpine as builder
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY main.go ./
+COPY go.mod go.sum ./
+RUN go mod download
 
-RUN go build -o server main.go
+COPY . .
+
+RUN go build -o server .
 
 FROM debian:bookworm-slim
 
