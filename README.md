@@ -17,6 +17,7 @@
 * **Testing**: pytest, pytest-asyncio, HTTPX, aiosqlite;
 * **Containerization**: Docker, Docker Compose;
 * **CI**: GitHub Actions;
+* **Golang**: 1.26;
 
 ---
 
@@ -50,6 +51,9 @@ API предоставляет следующие основные возмож�
    DB_PORT=5432
    DB_HOST_ALEMBIC=localhost
    DB_PORT_ALEMBIC=5433
+   RABBITMQ_PASSWORD=password
+   RABBITMQ_HOST=rabbitmq
+   RABBITMQ_PORT=5672
    ```
    DB_HOST_ALEMBIC и DB_PORT_ALEMBIC используются для локального запуска Alembic. При запуске в Docker Compose они автоматически переопределяются для подключения к сервису PostgreSQL.
 
